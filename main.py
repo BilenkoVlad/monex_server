@@ -37,6 +37,8 @@ def specific_currency(curs_code):
     if curs_code in currency_dict.keys():
         currency_dict.pop(curs_code)
 
+    # print
+
     for code in currency_dict:
         result[code] = WiseApi(sell=curs_code, buy=code).current_curs()
 
