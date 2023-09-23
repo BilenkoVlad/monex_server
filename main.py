@@ -1,9 +1,14 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 from api.wise_api import WiseApi
 from currency.currency import Currency
 
 app = Flask(__name__)
+
+
+@app.route('/', methods=['GET'])
+def start():
+    return render_template('index.html')
 
 
 @app.route('/api/current_curs', methods=['GET'])
