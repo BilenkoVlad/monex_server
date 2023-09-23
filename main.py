@@ -27,8 +27,8 @@ def monthly_curs():
     if sell is not None and buy is not None:
         if sell in Currency.currency_dict.keys() and buy in Currency.currency_dict.keys():
             data = WiseApi(sell=sell, buy=buy).monthly_range()
-            return jsonify(data)
-            # return render_template("index.html", data=data)
+            # return jsonify(data)
+            return render_template("index.html", data=jsonify(data))
         return f"{sell} currency is not available" if sell not in Currency.currency_dict.keys() else f"{buy} currency is not available"
 
 
@@ -46,4 +46,4 @@ def specific_currency(curs_code):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5001)
