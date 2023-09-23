@@ -1,3 +1,6 @@
+# No idea why you need something like this, but ok
+# Good to have it in the database
+
 class Currency:
     currency_dict = {
         "USD": "USD",

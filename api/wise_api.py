@@ -1,13 +1,14 @@
 import requests
-
+import os
 
 class WiseApi:
+
     def __init__(self, sell, buy):
         self._header = {
-            "Authorization": "Basic OGNhN2FlMjUtOTNjNS00MmFlLThhYjQtMzlkZTFlOTQzZDEwOjliN2UzNmZkLWRjYjgtNDEwZS1hYzc3LTQ5NGRmYmEyZGJjZA=="
+            "Authorization": f"Basic {os.environ.get('WISE_BEARER_TOKEN')}"
         }
-        self._base_api_url = "https://api.wise.com/v1/rates"
-        self._base_wise_url = "https://wise.com/rates/history+live"
+        self._base_api_url = os.environ.get('WISE_API_URL')
+        self._base_wise_url = os.environ.get('WISE_BASE_URL')
         self._sell = sell
         self._buy = buy
 
