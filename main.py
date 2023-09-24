@@ -61,8 +61,7 @@ async def specific_currency(code):
         return f"Currency {code} is not available"
 
     for other_currencies in currency_dict:
-        async with WiseApi(sell=code, buy=other_currencies).current_curs() as current_rate:
-            result[other_currencies] = current_rate
+        result[other_currencies] = WiseApi(sell=code, buy=other_currencies).current_curs()
 
     return result
 
