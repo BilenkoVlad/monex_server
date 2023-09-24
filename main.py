@@ -16,7 +16,6 @@ def start():
 
 @app.route('/api/available-currencies', methods=['GET'])
 def available_currencies():
-
     # 'list(...)' is required as jsonify(...) fails otherwise
     currencies = list(Currency.currency_dict.keys())
 
@@ -52,27 +51,23 @@ def monthly_rates():
 
 
 @app.route('/api/rates/<code>', methods=['GET'])
-def specific_currency(code):
-
-    # '.copy()' is required as we modify the dict by removing target currency
-    currencies_dict = Currency.currency_dict.copy()
-    currencies = currencies_dict.keys()
-
-    if code not in currencies:
-        return f"Currency {code} is not available"
-    else:
-        currencies_dict.pop(code)
-
-    # TODO: make `async for`
+async def specific_currency(code):
     result = {}
-    for other_currencies in currencies_dict:
-        result[other_currencies] = WiseApi(sell=code, buy=other_currencies).current_curs()
+    currency_dict = Currency.currency_dict.copy()
+
+    if code in currency_dict:
+        currency_dict.pop(code)
+    else:
+        return f"Currency {code} is not available"
+
+    for other_currencies in currency_dict:
+        async with WiseApi(sell=code, buy=other_currencies).current_curs() as current_rate:
+            result[other_currencies] = current_rate
 
     return result
 
 
 def validate_sell_buy_params(sell, buy):
-
     if not sell or not buy:
         return "'sell' and 'buy' are required"
 
