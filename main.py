@@ -62,6 +62,7 @@ async def specific_currency(code):
 
     for other_currencies in currency_dict:
         result[other_currencies] = WiseApi(sell=code, buy=other_currencies).current_curs()[0]
+        result[other_currencies]["rate"] = round(result[other_currencies]["rate"], 3)
 
     return result
 
