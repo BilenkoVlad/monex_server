@@ -7,7 +7,6 @@ class Currency:
         "AUD": "AUD",
         "CAD": "CAD",
         "CHF": "CHF",
-        "CSD": "CSD",
         "CZK": "CZK",
         "DKK": "DKK",
         "EUR": "EUR",
