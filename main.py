@@ -1,53 +1,88 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 
 from api.wise_api import WiseApi
 from currency.currency import Currency
+import dotenv
+
+dotenv.load_dotenv()
 
 app = Flask(__name__)
 
 
 @app.route('/', methods=['GET'])
 def start():
-    return render_template('index.html')
+    return "Currency Rates API"
 
 
-@app.route('/api/current_curs', methods=['GET'])
-def current_curs():
+@app.route('/api/available-currencies', methods=['GET'])
+def available_currencies():
+
+    # 'list(...)' is required as jsonify(...) fails otherwise
+    currencies = list(Currency.currency_dict.keys())
+
+    return jsonify({
+        "available_currencies": currencies
+    })
+
+
+@app.route('/api/rates', methods=['GET'])
+def current_rates():
     sell = request.args.get('sell')
     buy = request.args.get('buy')
 
-    if sell is not None and buy is not None:
-        if sell in Currency.currency_dict.keys() and buy in Currency.currency_dict.keys():
-            data = WiseApi(sell=sell, buy=buy).current_curs()
-            return jsonify(data)
-        return f"{sell} currency is not available" if sell not in Currency.currency_dict.keys() else f"{buy} currency is not available"
+    validation_error = validate_sell_buy_params(sell, buy)
+    if validation_error:
+        return jsonify({"message": validation_error}), 400
+
+    data = WiseApi(sell=sell, buy=buy).current_curs()
+    return jsonify(data)
 
 
-@app.route('/api/monthly_curs', methods=['GET'])
-def monthly_curs():
+@app.route('/api/rates/monthly', methods=['GET'])
+def monthly_rates():
     sell = request.args.get('sell')
     buy = request.args.get('buy')
 
-    if sell is not None and buy is not None:
-        if sell in Currency.currency_dict.keys() and buy in Currency.currency_dict.keys():
-            data = WiseApi(sell=sell, buy=buy).monthly_range()
-            return jsonify(data)
-        return f"{sell} currency is not available" if sell not in Currency.currency_dict.keys() else f"{buy} currency is not available"
+    validation_error = validate_sell_buy_params(sell, buy)
+    if validation_error:
+        return jsonify({"message": validation_error}), 400
+
+    data = WiseApi(sell=sell, buy=buy).monthly_range()
+    return jsonify(data)
 
 
-@app.route('/api/curs/<curs_code>', methods=['GET'])
-def specific_currency(curs_code):
+@app.route('/api/rates/<code>', methods=['GET'])
+def specific_currency(code):
+
+    # '.copy()' is required as we modify the dict by removing target currency
+    currencies_dict = Currency.currency_dict.copy()
+    currencies = currencies_dict.keys()
+
+    if code not in currencies:
+        return f"Currency {code} is not available"
+    else:
+        currencies_dict.pop(code)
+
+    # TODO: make `async for`
     result = {}
-    currency_dict = Currency.currency_dict
-    if curs_code in currency_dict.keys():
-        currency_dict.pop(curs_code)
-
-    # print
-
-    for code in currency_dict:
-        result[code] = WiseApi(sell=curs_code, buy=code).current_curs()
+    for other_currencies in currencies_dict:
+        result[other_currencies] = WiseApi(sell=code, buy=other_currencies).current_curs()
 
     return result
+
+
+def validate_sell_buy_params(sell, buy):
+
+    if not sell or not buy:
+        return "'sell' and 'buy' are required"
+
+    currencies = Currency.currency_dict.keys()
+
+    if sell.upper() not in currencies:
+        return f"Sell currency - {sell} is not available"
+
+    if buy.upper() not in currencies:
+        return f"Buy currency - {buy} is not available"
 
 
 if __name__ == '__main__':
