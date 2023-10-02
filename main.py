@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 
 from api.wise_api import WiseApi
+from api.x_change_api import XChangeApi
 from currency.currency import Currency
 import dotenv
 
@@ -58,7 +59,12 @@ async def specific_currency(code):
     if code == Currency.CZK:
         currency_dict.pop(Currency.USD)
         currency_dict.pop(Currency.EUR)
-        currency_dict.pop(Currency.UAH)
+    if code == Currency.USD:
+        currency_dict.pop(Currency.CZK)
+    if code == Currency.EUR:
+        currency_dict.pop(Currency.CZK)
+
+    result.update(own_czk_rates(give_currency=code))
 
     if code in currency_dict:
         currency_dict.pop(code)
@@ -67,7 +73,12 @@ async def specific_currency(code):
 
     for other_currencies in currency_dict:
         result[other_currencies] = WiseApi(sell=code, buy=other_currencies).current_curs()[0]
-        result[other_currencies]["rate"] = round(result[other_currencies]["rate"], 3)
+
+        if other_currencies == Currency.UAH:
+            result[other_currencies]["rate"] = round(
+                result[other_currencies]["rate"] + result[other_currencies]["rate"] * 0.0385, 3)
+        else:
+            result[other_currencies]["rate"] = round(result[other_currencies]["rate"], 3)
 
     return result
 
@@ -85,9 +96,37 @@ def validate_sell_buy_params(sell, buy):
         return f"Buy currency - {buy} is not available"
 
 
-def own_czk_rates():
-    pass
+def own_czk_rates(give_currency):
+    result = {}
+    response = XChangeApi().czk_rates()["rates"]
+    for rate in response:
+        try:
+            if give_currency == Currency.CZK:
+                if rate["curr"] == Currency.USD or rate["curr"] == Currency.EUR:
+                    result[rate["curr"]] = {
+                        "rate": rate["sell"]["value"],
+                        "source": "CZK",
+                        "target": rate["curr"],
+                    }
+            elif give_currency == Currency.USD:
+                if rate["curr"] == Currency.USD:
+                    result["CZK"] = {
+                        "rate": rate["buy"]["value"],
+                        "source": rate["curr"],
+                        "target": "CZK",
+                    }
+            elif give_currency == Currency.EUR:
+                if rate["curr"] == Currency.EUR:
+                    result["CZK"] = {
+                        "rate": rate["buy"]["value"],
+                        "source": rate["curr"],
+                        "target": "CZK",
+                    }
+        except TypeError:
+            print(f"JSON has invalid data in {rate}")
+
+    return result
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5001)
