@@ -55,6 +55,11 @@ async def specific_currency(code):
     result = {}
     currency_dict = Currency.currency_dict.copy()
 
+    if code == Currency.CZK:
+        currency_dict.pop(Currency.USD)
+        currency_dict.pop(Currency.EUR)
+        currency_dict.pop(Currency.UAH)
+
     if code in currency_dict:
         currency_dict.pop(code)
     else:
@@ -78,6 +83,10 @@ def validate_sell_buy_params(sell, buy):
 
     if buy.upper() not in currencies:
         return f"Buy currency - {buy} is not available"
+
+
+def own_czk_rates():
+    pass
 
 
 if __name__ == '__main__':
