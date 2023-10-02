@@ -59,9 +59,7 @@ async def specific_currency(code):
     if code == Currency.CZK:
         currency_dict.pop(Currency.USD)
         currency_dict.pop(Currency.EUR)
-    if code == Currency.USD:
-        currency_dict.pop(Currency.CZK)
-    if code == Currency.EUR:
+    if code == Currency.USD or code == Currency.EUR:
         currency_dict.pop(Currency.CZK)
 
     result.update(own_czk_rates(give_currency=code))
