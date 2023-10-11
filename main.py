@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 
+from api.mono_bank_api import MonoBankApi
 from api.wise_api import WiseApi
 from api.x_change_api import XChangeApi
 from currency.currency import Currency
@@ -59,10 +60,12 @@ async def specific_currency(code):
     if code == Currency.CZK:
         currency_dict.pop(Currency.USD)
         currency_dict.pop(Currency.EUR)
-    if code == Currency.USD or code == Currency.EUR:
+        currency_dict.pop(Currency.UAH)
+    if code == Currency.USD or code == Currency.EUR or code == Currency.UAH:
         currency_dict.pop(Currency.CZK)
 
     result.update(own_czk_rates(give_currency=code))
+    result.update(own_uah(give_currency=code))
 
     if code in currency_dict:
         currency_dict.pop(code)
@@ -72,11 +75,7 @@ async def specific_currency(code):
     for other_currencies in currency_dict:
         result[other_currencies] = WiseApi(sell=code, buy=other_currencies).current_curs()[0]
 
-        if other_currencies == Currency.UAH:
-            result[other_currencies]["rate"] = round(
-                result[other_currencies]["rate"] + result[other_currencies]["rate"] * 0.0385, 3)
-        else:
-            result[other_currencies]["rate"] = round(result[other_currencies]["rate"], 3)
+        result[other_currencies]["rate"] = round(result[other_currencies]["rate"], 3)
 
     return result
 
@@ -122,6 +121,27 @@ def own_czk_rates(give_currency):
                     }
         except TypeError:
             print(f"JSON has invalid data in {rate}")
+
+    return result
+
+
+def own_uah(give_currency):
+    result = {}
+    response = MonoBankApi().uah_rates()
+    for rate in response:
+        if rate["currencyCodeA"] == 203:
+            if give_currency == Currency.CZK:
+                result[Currency.UAH] = {
+                    "rate": round(rate["rateCross"], 3),
+                    "source": give_currency,
+                    "target": Currency.UAH,
+                }
+            elif give_currency == Currency.UAH:
+                result[Currency.CZK] = {
+                    "rate": round(1 / rate["rateCross"], 3),
+                    "source": give_currency,
+                    "target": Currency.CZK,
+                }
 
     return result
 
