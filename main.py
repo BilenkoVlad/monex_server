@@ -54,7 +54,7 @@ def monthly_rates():
 
 @app.route('/api/rates/<code>', methods=['GET'])
 async def specific_currency(code):
-    result = {}
+    result = []
     currency_dict = Currency.currency_dict.copy()
 
     if code == Currency.CZK:
@@ -64,8 +64,8 @@ async def specific_currency(code):
     if code == Currency.USD or code == Currency.EUR or code == Currency.UAH:
         currency_dict.pop(Currency.CZK)
 
-    result.update(own_czk_rates(give_currency=code))
-    result.update(own_uah(give_currency=code))
+    result.append(own_czk_rates(give_currency=code))
+    result.append(own_uah(give_currency=code))
 
     if code in currency_dict:
         currency_dict.pop(code)
@@ -73,9 +73,10 @@ async def specific_currency(code):
         return f"Currency {code} is not available"
 
     for other_currencies in currency_dict:
-        result[other_currencies] = WiseApi(sell=code, buy=other_currencies).current_curs()[0]
+        response = WiseApi(sell=code, buy=other_currencies).current_curs()[0]
+        result.append(response)
 
-        result[other_currencies]["rate"] = round(result[other_currencies]["rate"], 3)
+        result[result.index(response)]["rate"] = round(result[result.index(response)]["rate"], 3)
 
     return result
 
@@ -100,21 +101,21 @@ def own_czk_rates(give_currency):
         try:
             if give_currency == Currency.CZK:
                 if rate["curr"] == Currency.USD or rate["curr"] == Currency.EUR:
-                    result[rate["curr"]] = {
+                    result = {
                         "rate": rate["sell"]["value"],
                         "source": "CZK",
                         "target": rate["curr"],
                     }
             elif give_currency == Currency.USD:
                 if rate["curr"] == Currency.USD:
-                    result["CZK"] = {
+                    result = {
                         "rate": rate["buy"]["value"],
                         "source": rate["curr"],
                         "target": "CZK",
                     }
             elif give_currency == Currency.EUR:
                 if rate["curr"] == Currency.EUR:
-                    result["CZK"] = {
+                    result = {
                         "rate": rate["buy"]["value"],
                         "source": rate["curr"],
                         "target": "CZK",
@@ -131,13 +132,13 @@ def own_uah(give_currency):
     for rate in response:
         if rate["currencyCodeA"] == 203:
             if give_currency == Currency.CZK:
-                result[Currency.UAH] = {
+                result = {
                     "rate": round(rate["rateCross"], 3),
                     "source": give_currency,
                     "target": Currency.UAH,
                 }
             elif give_currency == Currency.UAH:
-                result[Currency.CZK] = {
+                result = {
                     "rate": round(1 / rate["rateCross"], 3),
                     "source": give_currency,
                     "target": Currency.CZK,
