@@ -66,8 +66,10 @@ async def specific_currency(code):
     if code == Currency.USD or code == Currency.EUR or code == Currency.UAH:
         currency_dict.pop(Currency.CZK)
 
-    result.append(own_czk_rates(give_currency=code))
-    result.append(own_uah(give_currency=code))
+    if code == Currency.USD or code == Currency.EUR or code == Currency.CZK:
+        result.append(own_czk_rates(give_currency=code))
+    if code == Currency.UAH or code == Currency.CZK:
+        result.append(own_uah(give_currency=code))
 
     if code in currency_dict:
         currency_dict.pop(code)
