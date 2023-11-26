@@ -1,6 +1,7 @@
 import requests
 import os
 
+
 class WiseApi:
 
     def __init__(self, sell, buy):

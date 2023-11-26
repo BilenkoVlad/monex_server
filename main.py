@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from werkzeug.exceptions import HTTPException
 
 from api.mono_bank_api import MonoBankApi
 from api.wise_api import WiseApi
@@ -53,6 +54,7 @@ def monthly_rates():
 
 
 @app.route('/api/rates/<code>', methods=['GET'])
+@app.errorhandler(HTTPException)
 async def specific_currency(code):
     result = []
     currency_dict = Currency.currency_dict.copy()
