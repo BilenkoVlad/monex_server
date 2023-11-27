@@ -67,7 +67,7 @@ async def specific_currency(code):
         currency_dict.pop(Currency.CZK)
 
     if code == Currency.USD or code == Currency.EUR or code == Currency.CZK:
-        result.append(own_czk_rates(give_currency=code))
+        result.extend(own_czk_rates(give_currency=code))
     if code == Currency.UAH or code == Currency.CZK:
         result.append(own_uah(give_currency=code))
 
@@ -99,17 +99,17 @@ def validate_sell_buy_params(sell, buy):
 
 
 def own_czk_rates(give_currency):
-    result = {}
+    result = []
     response = XChangeApi().czk_rates()["rates"]
     for rate in response:
         try:
             if give_currency == Currency.CZK:
                 if rate["curr"] == Currency.USD or rate["curr"] == Currency.EUR:
-                    result = {
+                    result.append({
                         "rate": rate["sell"]["value"],
                         "source": "CZK",
                         "target": rate["curr"],
-                    }
+                    })
             elif give_currency == Currency.USD:
                 if rate["curr"] == Currency.USD:
                     result = {
