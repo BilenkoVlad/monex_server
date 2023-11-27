@@ -112,18 +112,18 @@ def own_czk_rates(give_currency):
                     })
             elif give_currency == Currency.USD:
                 if rate["curr"] == Currency.USD:
-                    result = {
+                    result.append({
                         "rate": rate["buy"]["value"],
                         "source": rate["curr"],
                         "target": "CZK",
-                    }
+                    })
             elif give_currency == Currency.EUR:
                 if rate["curr"] == Currency.EUR:
-                    result = {
+                    result.append({
                         "rate": rate["buy"]["value"],
                         "source": rate["curr"],
                         "target": "CZK",
-                    }
+                    })
         except TypeError:
             print(f"JSON has invalid data in {rate}")
 
