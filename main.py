@@ -106,7 +106,7 @@ def own_czk_rates(give_currency):
             if give_currency == Currency.CZK:
                 if rate["curr"] == Currency.USD or rate["curr"] == Currency.EUR:
                     result.append({
-                        "rate": rate["sell"]["value"],
+                        "rate": round(1 / rate["sell"]["value"], 3),
                         "source": "CZK",
                         "target": rate["curr"],
                     })
