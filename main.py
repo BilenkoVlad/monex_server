@@ -183,23 +183,24 @@ def own_czk_rates(give_currency):
 
 def own_uah(give_currency):
     result = {}
-    response = MonoBankApi().uah_rates()
-    for rate in response:
-        if rate["currencyCodeA"] == 203:
-            if give_currency == Currency.CZK:
-                result = {
-                    "rate": round(rate["rateCross"], 3),
-                    "source": give_currency,
-                    "target": Currency.UAH,
-                }
-            elif give_currency == Currency.UAH:
-                result = {
-                    "rate": round(1 / rate["rateCross"], 3),
-                    "source": give_currency,
-                    "target": Currency.CZK,
-                }
-
-    return result
+    try:
+        response = MonoBankApi().uah_rates()
+        for rate in response:
+            if rate["currencyCodeA"] == 203:
+                if give_currency == Currency.CZK:
+                    result = {
+                        "rate": round(rate["rateCross"], 3),
+                        "source": give_currency,
+                        "target": Currency.UAH,
+                    }
+                elif give_currency == Currency.UAH:
+                    result = {
+                        "rate": round(1 / rate["rateCross"], 3),
+                        "source": give_currency,
+                        "target": Currency.CZK,
+                    }
+    except TypeError as e:
+        return result
 
 
 if __name__ == '__main__':
