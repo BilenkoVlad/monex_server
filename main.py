@@ -114,13 +114,22 @@ async def specific_currency(code):
         currency_dict.pop(Currency.USD)
         currency_dict.pop(Currency.EUR)
         currency_dict.pop(Currency.UAH)
+
     if code == Currency.USD or code == Currency.EUR or code == Currency.UAH:
         currency_dict.pop(Currency.CZK)
 
     if code == Currency.USD or code == Currency.EUR or code == Currency.CZK:
         result.extend(own_czk_rates(give_currency=code))
+
     if code == Currency.UAH or code == Currency.CZK:
-        result.append(own_uah(give_currency=code))
+        response = own_uah(give_currency=code)
+        if response is None:
+            if code == Currency.UAH:
+                currency_dict[Currency.CZK] = Currency.CZK
+            else:
+                currency_dict[Currency.UAH] = Currency.UAH
+        else:
+            result.append(response)
 
     if code in currency_dict:
         currency_dict.pop(code)
@@ -182,25 +191,25 @@ def own_czk_rates(give_currency):
 
 
 def own_uah(give_currency):
-    result = {}
     try:
         response = MonoBankApi().uah_rates()
         for rate in response:
             if rate["currencyCodeA"] == 203:
                 if give_currency == Currency.CZK:
-                    result = {
+                    return {
                         "rate": round(rate["rateCross"], 3),
                         "source": give_currency,
                         "target": Currency.UAH,
                     }
                 elif give_currency == Currency.UAH:
-                    result = {
+                    return {
                         "rate": round(1 / rate["rateCross"], 3),
                         "source": give_currency,
                         "target": Currency.CZK,
                     }
     except TypeError as e:
-        return result
+        print(e)
+        return None
 
 
 if __name__ == '__main__':
