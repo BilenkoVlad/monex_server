@@ -75,25 +75,30 @@ def current_rates():
             except TypeError:
                 print(f"JSON has invalid data in {rate}")
 
-    if sell == Currency.UAH and buy == Currency.CZK:
+    try:
         response = MonoBankApi().uah_rates()
-        for rate in response:
-            if rate["currencyCodeA"] == 203:
-                return [{
-                    "rate": round(rate["rateCross"], 3),
-                    "source": Currency.UAH,
-                    "target": Currency.CZK,
-                }]
+        if sell == Currency.UAH and buy == Currency.CZK:
+            response = MonoBankApi().uah_rates()
+            for rate in response:
+                if rate["currencyCodeA"] == 203:
+                    return [{
+                        "rate": round(1 / rate["rateCross"], 3),
+                        "source": Currency.UAH,
+                        "target": Currency.CZK,
+                    }]
 
-    if sell == Currency.CZK and buy == Currency.UAH:
-        response = MonoBankApi().uah_rates()
-        for rate in response:
-            if rate["currencyCodeA"] == 203:
-                return [{
-                    "rate": round(1 / rate["rateCross"], 3),
-                    "source": Currency.CZK,
-                    "target": Currency.UAH,
-                }]
+        if sell == Currency.CZK and buy == Currency.UAH:
+            response = MonoBankApi().uah_rates()
+            for rate in response:
+                if rate["currencyCodeA"] == 203:
+                    return [{
+                        "rate": round(rate["rateCross"], 3),
+                        "source": Currency.CZK,
+                        "target": Currency.UAH,
+                    }]
+    except TypeError as e:
+        data = WiseApi(sell=sell, buy=buy).current_curs()
+        return jsonify(data)
 
     data = WiseApi(sell=sell, buy=buy).current_curs()
     return jsonify(data)
