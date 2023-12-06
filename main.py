@@ -41,39 +41,39 @@ def current_rates():
         for rate in response:
             try:
                 if rate["curr"] == Currency.USD or rate["curr"] == Currency.EUR:
-                    return jsonify({
+                    return [{
                         "rate": round(1 / rate["sell"]["value"], 3),
                         "source": "CZK",
                         "target": rate["curr"],
-                    })
+                    }]
             except TypeError:
                 print(f"JSON has invalid data in {rate}")
     if sell == Currency.CZK and buy == Currency.UAH:
         response = MonoBankApi().uah_rates()
         for rate in response:
             if rate["currencyCodeA"] == 203:
-                return jsonify({
+                return [{
                     "rate": round(rate["rateCross"], 3),
                     "source": Currency.CZK,
                     "target": Currency.UAH,
-                })
+                }]
 
     if sell in [Currency.EUR, Currency.USD] and buy == Currency.CZK:
         response = XChangeApi().czk_rates()["rates"]
         for rate in response:
             try:
                 if rate["curr"] == Currency.USD:
-                    return jsonify({
+                    return [{
                         "rate": rate["buy"]["value"],
                         "source": rate["curr"],
                         "target": "CZK",
-                    })
+                    }]
                 if rate["curr"] == Currency.EUR:
-                    return jsonify({
+                    return [{
                         "rate": rate["buy"]["value"],
                         "source": rate["curr"],
                         "target": "CZK",
-                    })
+                    }]
             except TypeError:
                 print(f"JSON has invalid data in {rate}")
 
@@ -81,11 +81,11 @@ def current_rates():
         response = MonoBankApi().uah_rates()
         for rate in response:
             if rate["currencyCodeA"] == 203:
-                return jsonify({
+                return [{
                     "rate": round(1 / rate["rateCross"], 3),
                     "source": Currency.UAH,
                     "target": Currency.CZK,
-                })
+                }]
 
     data = WiseApi(sell=sell, buy=buy).current_curs()
     return jsonify(data)
