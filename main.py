@@ -40,12 +40,19 @@ def current_rates():
         response = XChangeApi().czk_rates()["rates"]
         for rate in response:
             try:
-                if rate["curr"] == Currency.USD or rate["curr"] == Currency.EUR:
+                if rate["curr"] == Currency.USD and buy == Currency.USD:
                     return [{
                         "rate": round(1 / rate["sell"]["value"], 3),
                         "source": "CZK",
                         "target": rate["curr"],
                     }]
+                if rate["curr"] == Currency.EUR and buy == Currency.EUR:
+                    return [{
+                        "rate": round(1 / rate["sell"]["value"], 3),
+                        "source": "CZK",
+                        "target": rate["curr"],
+                    }]
+
             except TypeError:
                 print(f"JSON has invalid data in {rate}")
     if sell == Currency.CZK and buy == Currency.UAH:
@@ -62,13 +69,13 @@ def current_rates():
         response = XChangeApi().czk_rates()["rates"]
         for rate in response:
             try:
-                if rate["curr"] == Currency.USD:
+                if rate["curr"] == Currency.USD and sell == Currency.USD:
                     return [{
                         "rate": rate["buy"]["value"],
                         "source": rate["curr"],
                         "target": "CZK",
                     }]
-                if rate["curr"] == Currency.EUR:
+                if rate["curr"] == Currency.EUR and sell == Currency.EUR:
                     return [{
                         "rate": rate["buy"]["value"],
                         "source": rate["curr"],
