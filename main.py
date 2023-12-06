@@ -55,15 +55,6 @@ def current_rates():
 
             except TypeError:
                 print(f"JSON has invalid data in {rate}")
-    if sell == Currency.CZK and buy == Currency.UAH:
-        response = MonoBankApi().uah_rates()
-        for rate in response:
-            if rate["currencyCodeA"] == 203:
-                return [{
-                    "rate": round(rate["rateCross"], 3),
-                    "source": Currency.CZK,
-                    "target": Currency.UAH,
-                }]
 
     if sell in [Currency.EUR, Currency.USD] and buy == Currency.CZK:
         response = XChangeApi().czk_rates()["rates"]
@@ -89,9 +80,19 @@ def current_rates():
         for rate in response:
             if rate["currencyCodeA"] == 203:
                 return [{
-                    "rate": round(1 / rate["rateCross"], 3),
+                    "rate": round(rate["rateCross"], 3),
                     "source": Currency.UAH,
                     "target": Currency.CZK,
+                }]
+
+    if sell == Currency.CZK and buy == Currency.UAH:
+        response = MonoBankApi().uah_rates()
+        for rate in response:
+            if rate["currencyCodeA"] == 203:
+                return [{
+                    "rate": round(1 / rate["rateCross"], 3),
+                    "source": Currency.CZK,
+                    "target": Currency.UAH,
                 }]
 
     data = WiseApi(sell=sell, buy=buy).current_curs()
