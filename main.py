@@ -36,6 +36,70 @@ def current_rates():
     if validation_error:
         return jsonify({"message": validation_error}), 400
 
+    if sell == Currency.CZK and buy in [Currency.EUR, Currency.USD]:
+        response = XChangeApi().czk_rates()["rates"]
+        for rate in response:
+            try:
+                if rate["curr"] == Currency.USD and buy == Currency.USD:
+                    return [{
+                        "rate": round(1 / rate["sell"]["value"], 3),
+                        "source": "CZK",
+                        "target": rate["curr"],
+                    }]
+                if rate["curr"] == Currency.EUR and buy == Currency.EUR:
+                    return [{
+                        "rate": round(1 / rate["sell"]["value"], 3),
+                        "source": "CZK",
+                        "target": rate["curr"],
+                    }]
+
+            except TypeError:
+                print(f"JSON has invalid data in {rate}")
+
+    if sell in [Currency.EUR, Currency.USD] and buy == Currency.CZK:
+        response = XChangeApi().czk_rates()["rates"]
+        for rate in response:
+            try:
+                if rate["curr"] == Currency.USD and sell == Currency.USD:
+                    return [{
+                        "rate": rate["buy"]["value"],
+                        "source": rate["curr"],
+                        "target": "CZK",
+                    }]
+                if rate["curr"] == Currency.EUR and sell == Currency.EUR:
+                    return [{
+                        "rate": rate["buy"]["value"],
+                        "source": rate["curr"],
+                        "target": "CZK",
+                    }]
+            except TypeError:
+                print(f"JSON has invalid data in {rate}")
+
+    try:
+        response = MonoBankApi().uah_rates()
+        if sell == Currency.UAH and buy == Currency.CZK:
+            response = MonoBankApi().uah_rates()
+            for rate in response:
+                if rate["currencyCodeA"] == 203:
+                    return [{
+                        "rate": round(1 / rate["rateCross"], 3),
+                        "source": Currency.UAH,
+                        "target": Currency.CZK,
+                    }]
+
+        if sell == Currency.CZK and buy == Currency.UAH:
+            response = MonoBankApi().uah_rates()
+            for rate in response:
+                if rate["currencyCodeA"] == 203:
+                    return [{
+                        "rate": round(rate["rateCross"], 3),
+                        "source": Currency.CZK,
+                        "target": Currency.UAH,
+                    }]
+    except TypeError as e:
+        data = WiseApi(sell=sell, buy=buy).current_curs()
+        return jsonify(data)
+
     data = WiseApi(sell=sell, buy=buy).current_curs()
     return jsonify(data)
 
@@ -76,13 +140,22 @@ async def specific_currency(code):
         currency_dict.pop(Currency.USD)
         currency_dict.pop(Currency.EUR)
         currency_dict.pop(Currency.UAH)
+
     if code == Currency.USD or code == Currency.EUR or code == Currency.UAH:
         currency_dict.pop(Currency.CZK)
 
     if code == Currency.USD or code == Currency.EUR or code == Currency.CZK:
-        result.append(own_czk_rates(give_currency=code))
+        result.extend(own_czk_rates(give_currency=code))
+
     if code == Currency.UAH or code == Currency.CZK:
-        result.append(own_uah(give_currency=code))
+        response = own_uah(give_currency=code)
+        if response is None:
+            if code == Currency.UAH:
+                currency_dict[Currency.CZK] = Currency.CZK
+            else:
+                currency_dict[Currency.UAH] = Currency.UAH
+        else:
+            result.append(response)
 
     if code in currency_dict:
         currency_dict.pop(code)
@@ -112,31 +185,31 @@ def validate_sell_buy_params(sell, buy):
 
 
 def own_czk_rates(give_currency):
-    result = {}
+    result = []
     response = XChangeApi().czk_rates()["rates"]
     for rate in response:
         try:
             if give_currency == Currency.CZK:
                 if rate["curr"] == Currency.USD or rate["curr"] == Currency.EUR:
-                    result = {
-                        "rate": rate["sell"]["value"],
+                    result.append({
+                        "rate": round(1 / rate["sell"]["value"], 3),
                         "source": "CZK",
                         "target": rate["curr"],
-                    }
+                    })
             elif give_currency == Currency.USD:
                 if rate["curr"] == Currency.USD:
-                    result = {
+                    result.append({
                         "rate": rate["buy"]["value"],
                         "source": rate["curr"],
                         "target": "CZK",
-                    }
+                    })
             elif give_currency == Currency.EUR:
                 if rate["curr"] == Currency.EUR:
-                    result = {
+                    result.append({
                         "rate": rate["buy"]["value"],
                         "source": rate["curr"],
                         "target": "CZK",
-                    }
+                    })
         except TypeError:
             print(f"JSON has invalid data in {rate}")
 
@@ -144,24 +217,25 @@ def own_czk_rates(give_currency):
 
 
 def own_uah(give_currency):
-    result = {}
-    response = MonoBankApi().uah_rates()
-    for rate in response:
-        if rate["currencyCodeA"] == 203:
-            if give_currency == Currency.CZK:
-                result = {
-                    "rate": round(rate["rateCross"], 3),
-                    "source": give_currency,
-                    "target": Currency.UAH,
-                }
-            elif give_currency == Currency.UAH:
-                result = {
-                    "rate": round(1 / rate["rateCross"], 3),
-                    "source": give_currency,
-                    "target": Currency.CZK,
-                }
-
-    return result
+    try:
+        response = MonoBankApi().uah_rates()
+        for rate in response:
+            if rate["currencyCodeA"] == 203:
+                if give_currency == Currency.CZK:
+                    return {
+                        "rate": round(rate["rateCross"], 3),
+                        "source": give_currency,
+                        "target": Currency.UAH,
+                    }
+                elif give_currency == Currency.UAH:
+                    return {
+                        "rate": round(1 / rate["rateCross"], 3),
+                        "source": give_currency,
+                        "target": Currency.CZK,
+                    }
+    except TypeError as e:
+        print(e)
+        return None
 
 
 if __name__ == '__main__':
