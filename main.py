@@ -53,6 +53,19 @@ def monthly_rates():
     return jsonify(data)
 
 
+@app.route('/api/rates/yearly', methods=['GET'])
+def yearly_range():
+    sell = request.args.get('sell')
+    buy = request.args.get('buy')
+
+    validation_error = validate_sell_buy_params(sell, buy)
+    if validation_error:
+        return jsonify({"message": validation_error}), 400
+
+    data = WiseApi(sell=sell, buy=buy).yearly_range()
+    return jsonify(data)
+
+
 @app.route('/api/rates/<code>', methods=['GET'])
 @app.errorhandler(HTTPException)
 async def specific_currency(code):

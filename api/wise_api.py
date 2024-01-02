@@ -21,3 +21,7 @@ class WiseApi:
     def monthly_range(self):
         return requests.get(
             url=f"{self._base_wise_url}?source={self._sell}&target={self._buy}&length=30&resolution=hourly&unit=day").json()
+
+    def yearly_range(self):
+        return requests.get(
+            url=f"{self._base_wise_url}?source={self._sell}&target={self._buy}&length=1&resolution=daily&unit=year").json()
