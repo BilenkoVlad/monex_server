@@ -31,7 +31,10 @@ def available_currencies():
 
 @app.route('/download/android', methods=['GET'])
 def apk_download():
-    return send_file(path_or_file=f"{os.getcwd()}/android/app-release.apk", as_attachment=True, download_name="monex")
+    return send_file(path_or_file=f"{os.getcwd()}/android/app-release.apk",
+                     as_attachment=True,
+                     download_name="monex",
+                     mimetype='application/vnd.android.package-archive')
 
 
 @app.route('/api/rates', methods=['GET'])
