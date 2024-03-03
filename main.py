@@ -1,4 +1,6 @@
-from flask import Flask, request, jsonify
+import os.path
+
+from flask import Flask, request, jsonify, send_file
 from werkzeug.exceptions import HTTPException
 
 from api.mono_bank_api import MonoBankApi
@@ -25,6 +27,11 @@ def available_currencies():
     return jsonify({
         "available_currencies": currencies
     })
+
+
+@app.route('/download/android', methods=['GET'])
+def apk_download():
+    return send_file(path_or_file=f"{os.getcwd()}/android/app-release.apk", as_attachment=True, download_name="monex")
 
 
 @app.route('/api/rates', methods=['GET'])
