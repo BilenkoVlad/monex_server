@@ -33,7 +33,7 @@ def available_currencies():
 def apk_download():
     return send_file(path_or_file=f"{os.getcwd()}/android/app-release.apk",
                      as_attachment=True,
-                     download_name="monex",
+                     download_name="Monex",
                      mimetype='application/vnd.android.package-archive')
 
 
