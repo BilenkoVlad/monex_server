@@ -1,14 +1,13 @@
 import os.path
 
+import dotenv
 from flask import Flask, request, jsonify, send_file
 from werkzeug.exceptions import HTTPException
 
-from api import MonoBankApi
-from api import WiseApi
-from api import XChangeApi
+from api.mono_bank_api import MonoBankApi
+from api.wise_api import WiseApi
+from api.x_change_api import XChangeApi
 from currency.currency import Currency
-from firebase_functions import https_fn
-import dotenv
 
 dotenv.load_dotenv()
 
@@ -247,9 +246,3 @@ def own_uah(give_currency):
     except TypeError as e:
         print(e)
         return None
-
-
-@https_fn.on_request()
-def httpsflaskexample(req: https_fn.Request) -> https_fn.Response:
-    with app.request_context(req.environ):
-        return app.full_dispatch_request()
