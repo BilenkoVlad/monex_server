@@ -142,7 +142,7 @@ def yearly_range():
 
 @app.route('/api/rates/<code>', methods=['GET'])
 @app.errorhandler(HTTPException)
-async def specific_currency(code):
+def specific_currency(code):
     result = []
     currency_dict = Currency.currency_dict.copy()
 
