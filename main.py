@@ -14,12 +14,12 @@ dotenv.load_dotenv()
 app = Flask(__name__)
 
 
-@app.get('/')
+@app.route('/', methods=['GET'])
 def start():
     return "Currency Rates API"
 
 
-@app.get('/api/available-currencies')
+@app.route('/api/available-currencies', methods=['GET'])
 def available_currencies():
     # 'list(...)' is required as jsonify(...) fails otherwise
     currencies = list(Currency.currency_dict.keys())
@@ -29,7 +29,7 @@ def available_currencies():
     })
 
 
-@app.get('/download/android')
+@app.route('/download/android', methods=['GET'])
 def apk_download():
     return send_file(path_or_file=f"{os.getcwd()}/android/app-release.apk",
                      as_attachment=True,
@@ -37,7 +37,7 @@ def apk_download():
                      mimetype='application/vnd.android.package-archive')
 
 
-@app.get('/api/rates')
+@app.route('/api/rates', methods=['GET'])
 def current_rates():
     sell = request.args.get('sell')
     buy = request.args.get('buy')
@@ -114,7 +114,7 @@ def current_rates():
     return jsonify(data)
 
 
-@app.get('/api/rates/monthly')
+@app.route('/api/rates/monthly', methods=['GET'])
 def monthly_rates():
     sell = request.args.get('sell')
     buy = request.args.get('buy')
@@ -127,7 +127,7 @@ def monthly_rates():
     return jsonify(data)
 
 
-@app.get('/api/rates/yearly')
+@app.route('/api/rates/yearly', methods=['GET'])
 def yearly_range():
     sell = request.args.get('sell')
     buy = request.args.get('buy')
@@ -140,7 +140,7 @@ def yearly_range():
     return jsonify(data)
 
 
-@app.get('/api/rates/<code>')
+@app.route('/api/rates/<code>', methods=['GET'])
 @app.errorhandler(HTTPException)
 async def specific_currency(code):
     result = []
