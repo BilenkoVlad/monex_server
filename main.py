@@ -1,5 +1,6 @@
 import os.path
 
+import dotenv
 from flask import Flask, request, jsonify, send_file
 from werkzeug.exceptions import HTTPException
 
@@ -7,19 +8,18 @@ from api.mono_bank_api import MonoBankApi
 from api.wise_api import WiseApi
 from api.x_change_api import XChangeApi
 from currency.currency import Currency
-import dotenv
 
 dotenv.load_dotenv()
 
 app = Flask(__name__)
 
 
-@app.route('/', methods=['GET'])
+@app.get('/')
 def start():
     return "Currency Rates API"
 
 
-@app.route('/api/available-currencies', methods=['GET'])
+@app.get('/api/available-currencies')
 def available_currencies():
     # 'list(...)' is required as jsonify(...) fails otherwise
     currencies = list(Currency.currency_dict.keys())
@@ -29,7 +29,7 @@ def available_currencies():
     })
 
 
-@app.route('/download/android', methods=['GET'])
+@app.get('/download/android')
 def apk_download():
     return send_file(path_or_file=f"{os.getcwd()}/android/app-release.apk",
                      as_attachment=True,
@@ -37,7 +37,7 @@ def apk_download():
                      mimetype='application/vnd.android.package-archive')
 
 
-@app.route('/api/rates', methods=['GET'])
+@app.get('/api/rates')
 def current_rates():
     sell = request.args.get('sell')
     buy = request.args.get('buy')
@@ -114,7 +114,7 @@ def current_rates():
     return jsonify(data)
 
 
-@app.route('/api/rates/monthly', methods=['GET'])
+@app.get('/api/rates/monthly')
 def monthly_rates():
     sell = request.args.get('sell')
     buy = request.args.get('buy')
@@ -127,7 +127,7 @@ def monthly_rates():
     return jsonify(data)
 
 
-@app.route('/api/rates/yearly', methods=['GET'])
+@app.get('/api/rates/yearly')
 def yearly_range():
     sell = request.args.get('sell')
     buy = request.args.get('buy')
@@ -140,7 +140,7 @@ def yearly_range():
     return jsonify(data)
 
 
-@app.route('/api/rates/<code>', methods=['GET'])
+@app.get('/api/rates/<code>')
 @app.errorhandler(HTTPException)
 async def specific_currency(code):
     result = []
@@ -246,7 +246,3 @@ def own_uah(give_currency):
     except TypeError as e:
         print(e)
         return None
-
-
-if __name__ == '__main__':
-    app.run(port=5001)

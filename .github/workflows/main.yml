@@ -1,8 +1,8 @@
 name: Fetch API Data
 
 on:
-  # schedule:
-    # - cron: '0 * * * *'  # This runs every hour
+  schedule:
+    - cron: '0 * * * *'  # This runs every hour
   push:
     branches:
       - main
