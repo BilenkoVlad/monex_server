@@ -246,3 +246,7 @@ def own_uah(give_currency):
     except TypeError as e:
         print(e)
         return None
+
+
+if __name__ == '__main__':
+    app.run(port=5001)

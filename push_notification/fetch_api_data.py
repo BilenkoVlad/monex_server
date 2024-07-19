@@ -3,8 +3,11 @@ import os
 from datetime import datetime
 
 import aiohttp
+import dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
+
+dotenv.load_dotenv()
 
 
 async def fetch_data(url):
