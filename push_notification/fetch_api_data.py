@@ -33,11 +33,17 @@ async def update_currency_data(currency):
 
 async def main():
     remote = os.getenv("FIREBASE_SERVICE_ACCOUNT_MONEX_APP_F86C7")
+    print(f"remote = {remote}")
     service_account_file = f'{os.path.dirname(os.path.abspath(__file__))}/secret.json'
 
     if remote is not None:
         with open(service_account_file, 'w') as json_file:
             json.dump(remote, json_file, indent=4)
+
+    for root, dirs, files in os.walk(os.path.dirname(os.path.abspath(__file__))):
+        for file in files:
+            # Add file paths to the list
+            print(os.path.join(root, file))
 
     cred = credentials.Certificate(service_account_file)
     firebase_admin.initialize_app(cred)
