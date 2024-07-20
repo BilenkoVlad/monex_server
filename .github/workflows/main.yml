@@ -2,7 +2,7 @@ name: Fetch API Data
 
 on:
   schedule:
-    - cron: '* * * * *'  # This runs every hour
+    - cron: '1 * * * *'  # This runs every hour
   push:
     branches:
       - main
