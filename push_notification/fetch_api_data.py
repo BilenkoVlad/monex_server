@@ -32,7 +32,7 @@ async def update_currency_data(currency):
 
 
 async def main():
-    remote = os.getenv("FIREBASE_SERVICE_ACCOUNT_MONEX_APP_F86C7")
+    remote = os.getenv("FIREBASE_SERVICE_ACCOUNT")
     print(f"remote = {remote}")
     service_account_file = f'{os.path.dirname(os.path.abspath(__file__))}/secret.json'
 
