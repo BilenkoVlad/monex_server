@@ -38,7 +38,7 @@ async def main():
 
     if remote is not None:
         with open(service_account_file, 'w') as json_file:
-            json.dump(remote, json_file, indent=4)
+            json.dump(json.loads(remote), json_file, indent=4)
 
     for root, dirs, files in os.walk(os.path.dirname(os.path.abspath(__file__))):
         for file in files:
