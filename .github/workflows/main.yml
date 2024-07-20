@@ -26,6 +26,6 @@ jobs:
           pip install firebase-admin requests
 
       - name: Run fetch script
-        run: python fetch_api_data.py
+        run: python push_notification/fetch_api_data.py
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MONEX_APP_F86C7 }}
