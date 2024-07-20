@@ -36,9 +36,8 @@ async def main():
     service_account_file = f'{os.path.dirname(os.path.abspath(__file__))}/secret.json'
 
     if remote is not None:
-        data = json.loads(remote)
         with open(service_account_file, 'w') as json_file:
-            json.dump(data, json_file, indent=4)
+            json.dump(remote, json_file, indent=4)
 
     cred = credentials.Certificate(service_account_file)
     firebase_admin.initialize_app(cred)
