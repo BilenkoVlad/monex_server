@@ -32,7 +32,7 @@ async def update_currency_data(currency):
 
 async def main():
     service_account_file = f'{os.path.dirname(os.path.abspath(__file__))}/secret.json' if os.getenv(
-        "FIREBASE_SERVICE_ACCOUNT_MONEX_APP_F86C7") is None else os.getenv("FIREBASE_SERVICE_ACCOUNT_MONEX_APP_F86C7")
+        "FIREBASE_SERVICE_ACCOUNT") is None else os.getenv("FIREBASE_SERVICE_ACCOUNT")
 
     cred = credentials.Certificate(service_account_file)
     firebase_admin.initialize_app(cred)
