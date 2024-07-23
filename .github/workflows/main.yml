@@ -5,7 +5,7 @@ on:
     - cron: '0 * * * *'  # This runs every hour
   push:
     branches:
-      - main
+      - test_notification
 
 jobs:
   fetch-data:

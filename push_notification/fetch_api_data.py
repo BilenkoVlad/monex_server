@@ -6,7 +6,7 @@ from datetime import datetime
 import aiohttp
 import dotenv
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, messaging
 
 dotenv.load_dotenv()
 
@@ -68,6 +68,47 @@ async def main():
             updates = {currency: result for currency, result in zip(response["available_currencies"], results) if
                        result is not None}
             current_doc.update(updates)
+
+            for user in db.collection("users").get():
+                print(user.id)
+                print(user.to_dict())
+                for key in user.to_dict().keys():
+                    if key != "platform":
+                        for currency in user.to_dict()[key]:
+                            if currency["follow"]:
+                                print(f"source = {key}, target = {currency}")
+
+                                target = currency["target"]
+                                source = currency["source"]
+                                current_rate = 0
+                                previous_rate = 0
+
+                                for current in db.collection("api_data").document("current").get().to_dict().keys():
+                                    if current == source:
+                                        for val in db.collection("api_data").document("current").get().to_dict()[
+                                            current]:
+                                            if val["target"] == target:
+                                                current_rate = val["rate"]
+
+                                for previous in db.collection("api_data").document("previous").get().to_dict().keys():
+                                    if previous == source:
+                                        for val in db.collection("api_data").document("current").get().to_dict()[
+                                            previous]:
+                                            if val["target"] == target:
+                                                previous_rate = val["rate"]
+
+                                if current_rate != previous_rate:
+                                    a = messaging.Message(
+                                        notification=messaging.Notification(
+                                            title="Python",
+                                            body=f"{target} currency to {source}"
+                                        ),
+                                        token="foaANwfD80NbjGAzOozhcv:APA91bEVR-XgFCDJiq2apFX2HIGPO3R_bZMxJU-GdKOg9pSHeg-IjoVVIm06d5tCy_cgjhfLH3VBDrcgYYMAl8Ew5dlPrLUl0egFikMHorvrbbXOBYyaN5fQeFdXmro7pivHqPUIZ3DH"
+                                    )
+                                    messaging.send(a)
+                                print(current_rate)
+                                print(previous_rate)
+
         else:
             print("No data to process")
     except Exception as e:
