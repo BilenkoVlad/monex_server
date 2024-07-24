@@ -26,3 +26,6 @@ class FirebaseBase:
 
         self.database = firestore.client()
         self.server_url = os.environ.get('SERVER_URL')
+        self.api_data = "api_data"
+        self.users = "users"
+        self.notifications = "notifications"
