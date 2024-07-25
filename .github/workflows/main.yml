@@ -27,7 +27,6 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run fetch script
-        working-directory: /monex_server
         run: |
           cd push_notification
           python fetch_api_data.py
