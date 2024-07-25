@@ -1,6 +1,6 @@
 name: Fetch API Data
 
-on: 
+on:
   workflow_dispatch:
   schedule:
     - cron: '0 * * * *'  # This runs every hour
@@ -27,6 +27,6 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run fetch script
-        run: python fetch_api_data.py
+        run: python fetch_api_data_script.py
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MONEX_APP_F86C7 }}
