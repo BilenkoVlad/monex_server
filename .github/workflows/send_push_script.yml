@@ -26,7 +26,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run fetch script
-        run: python fetch_api_data_script.py
+      - name: Send Push Notifications
+        run: python send_push_script.py
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MONEX_APP_F86C7 }}
