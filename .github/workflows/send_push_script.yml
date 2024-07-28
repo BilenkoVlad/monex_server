@@ -30,3 +30,4 @@ jobs:
         run: python send_push_script.py
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MONEX_APP_F86C7 }}
+          SERVER_URL: ${{ secrets.SERVER_URL }}
