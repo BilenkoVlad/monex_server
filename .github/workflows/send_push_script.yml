@@ -1,4 +1,4 @@
-name: Fetch API Data
+name: Send Push Notifications
 
 on:
   workflow_dispatch:
