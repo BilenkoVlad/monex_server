@@ -1,8 +1,11 @@
 import json
 import os
 
+import dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
+
+dotenv.load_dotenv()
 
 
 class FirebaseBase:
