@@ -48,7 +48,9 @@ class SendPush(FirebaseBase):
                 self.database.collection(self.users).document(token.id).collection(self.notifications).add(
                     {"text": f"{target} currency to {source} is decreased to {user_info[source][target]['current']}",
                      "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
-                     "up": True
+                     "up": True,
+                     "target": target,
+                     "source": source
                      })
 
             if user_info[source][target]["previous"] > user_info[source][target]["current"]:
@@ -64,7 +66,9 @@ class SendPush(FirebaseBase):
                 self.database.collection(self.users).document(token.id).collection(self.notifications).add(
                     {"text": f"{target} currency to {source} is decreased to {user_info[source][target]['current']}",
                      "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
-                     "up": False
+                     "up": False,
+                     "target": target,
+                     "source": source
                      })
 
     async def main(self):
