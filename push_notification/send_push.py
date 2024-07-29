@@ -50,7 +50,8 @@ class SendPush(FirebaseBase):
                      "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
                      "up": True,
                      "target": target,
-                     "source": source
+                     "source": source,
+                     "value": user_info[source][target]['current']
                      })
 
             if user_info[source][target]["previous"] > user_info[source][target]["current"]:
@@ -68,7 +69,8 @@ class SendPush(FirebaseBase):
                      "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
                      "up": False,
                      "target": target,
-                     "source": source
+                     "source": source,
+                     "value": user_info[source][target]['current']
                      })
 
     async def main(self):
