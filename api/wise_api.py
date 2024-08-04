@@ -1,10 +1,12 @@
-import requests
 import os
 
+from api.api_base import ApiBase
 
-class WiseApi:
+
+class WiseApi(ApiBase):
 
     def __init__(self, sell, buy):
+        super().__init__()
         self._header = {
             "Authorization": f"Basic {os.environ.get('WISE_BEARER_TOKEN')}"
         }
@@ -14,14 +16,14 @@ class WiseApi:
         self._buy = buy
 
     def current_curs(self):
-        return requests.get(
+        return self.request.get(
             url=f"{self._base_api_url}?source={self._sell}&target={self._buy}",
             headers=self._header).json()
 
     def monthly_range(self):
-        return requests.get(
+        return self.request.get(
             url=f"{self._base_wise_url}?source={self._sell}&target={self._buy}&length=30&resolution=hourly&unit=day").json()
 
     def yearly_range(self):
-        return requests.get(
+        return self.request.get(
             url=f"{self._base_wise_url}?source={self._sell}&target={self._buy}&length=1&resolution=daily&unit=year").json()

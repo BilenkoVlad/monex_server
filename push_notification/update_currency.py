@@ -23,14 +23,11 @@ class UpdateCurrency(FirebaseBase):
                 async with session.get(f"{self.server_url}/api/rates/{currency}", ssl=False) as response:
                     if response.status == 200:
                         return await response.json()
-                    elif 500 <= response.status < 600:
+                    else:
                         retries += 1
                         print(
                             f"Server error ({response.status}) for currency {currency}, retrying {retries}/{max_retries}...")
                         await asyncio.sleep(1)  # Optional: wait for a second before retrying
-                    else:
-                        print(f"Failed to fetch data for currency {currency}: {response.status}")
-                        return None
         print(f"Exceeded maximum retries for currency {currency}")
         return None
 
