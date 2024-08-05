@@ -36,6 +36,7 @@ class SendPush(FirebaseBase):
         await self.update_user_info_rates(source_cur=source, targets=targets, rate_data="previous", user_info=user_info)
 
         for target in targets:
+            message = None
             if user_info[source][target]["previous"] < user_info[source][target]["current"]:
                 message = messaging.Message(
                     notification=messaging.Notification(
@@ -44,7 +45,7 @@ class SendPush(FirebaseBase):
                     ),
                     token=token.id
                 )
-                messaging.send(message)
+
                 self.database.collection(self.users).document(token.id).collection(self.notifications).add(
                     {"text": f"{target} currency to {source} is decreased to {user_info[source][target]['current']}",
                      "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
@@ -62,7 +63,6 @@ class SendPush(FirebaseBase):
                     ),
                     token=token.id,
                 )
-                messaging.send(message)
 
                 self.database.collection(self.users).document(token.id).collection(self.notifications).add(
                     {"text": f"{target} currency to {source} is decreased to {user_info[source][target]['current']}",
@@ -72,6 +72,13 @@ class SendPush(FirebaseBase):
                      "source": source,
                      "value": user_info[source][target]['current']
                      })
+
+            if message is not None:
+                try:
+                    messaging.send(message)
+                except Exception as ex:
+                    if str(ex) == "Requested entity was not found.":
+                        self.database.collection(self.users).document(token.id).delete()
 
     async def main(self):
         user_tokens = self.database.collection(self.users).get()
