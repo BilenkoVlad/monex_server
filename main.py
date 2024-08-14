@@ -1,4 +1,3 @@
-import asyncio
 import os.path
 
 import dotenv
@@ -188,22 +187,18 @@ async def refresh_data():
     try:
         await UpdateCurrency().main()
         return jsonify({"message": "refreshed"}), 200
-    except asyncio.TimeoutError:
-        return jsonify({"error": "The operation timed out"}), 408
-    except HTTPException as e:
-        return jsonify({"error": e.name, "description": e.description}), e.code
     except Exception as e:
-        return jsonify({"error": "Internal Server Error", "description": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 
-# @app.errorhandler(HTTPException)
-# def handle_http_exception(e):
-#     response = jsonify({
-#         "error": e.name,
-#         "description": e.description
-#     })
-#     response.status_code = e.code
-#     return response
+@app.errorhandler(HTTPException)
+def handle_http_exception(e):
+    response = jsonify({
+        "error": e.name,
+        "description": e.description
+    })
+    response.status_code = e.code
+    return response
 
 
 def validate_sell_buy_params(sell, buy):
