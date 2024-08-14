@@ -22,17 +22,8 @@ class UpdateCurrency(FirebaseBase):
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"{self.server_url}/api/rates/{currency}", ssl=False) as response:
                     if response.status == 200:
-                        first_result = await response.json()
-
-                        for result in first_result:
-                            async with session.get(
-                                    f"{self.server_url}/api/rates/yearly?buy={currency}&sell={result['target']}",
-                                    ssl=False) as response2:
-                                if response2.status == 200:
-                                    first_result["yearly"] = await response2.json()
-
                         print(currency)
-                        return
+                        return await response.json()
                     else:
                         retries += 1
                         print(
