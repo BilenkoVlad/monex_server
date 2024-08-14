@@ -184,9 +184,21 @@ def specific_currency(code):
 
 @app.route('/api/refresh_data', methods=['GET'])
 async def refresh_data():
-    await UpdateCurrency().main()
+    try:
+        await UpdateCurrency().main()
+        return jsonify({"message": "refreshed"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    return jsonify({"message": "refreshed"}), 200
+
+@app.errorhandler(HTTPException)
+def handle_http_exception(e):
+    response = jsonify({
+        "error": e.name,
+        "description": e.description
+    })
+    response.status_code = e.code
+    return response
 
 
 def validate_sell_buy_params(sell, buy):
