@@ -8,7 +8,6 @@ from api.mono_bank_api import MonoBankApi
 from api.wise_api import WiseApi
 from api.x_change_api import XChangeApi
 from currency.currency import Currency
-from push_notification.update_currency import UpdateCurrency
 
 dotenv.load_dotenv()
 
@@ -180,25 +179,6 @@ def specific_currency(code):
         result[result.index(response)]["rate"] = round(result[result.index(response)]["rate"], 3)
 
     return result
-
-
-@app.route('/api/refresh_data', methods=['GET'])
-async def refresh_data():
-    try:
-        await UpdateCurrency().main()
-        return jsonify({"message": "refreshed"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.errorhandler(HTTPException)
-def handle_http_exception(e):
-    response = jsonify({
-        "error": e.name,
-        "description": e.description
-    })
-    response.status_code = e.code
-    return response
 
 
 def validate_sell_buy_params(sell, buy):
