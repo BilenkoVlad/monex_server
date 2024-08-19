@@ -77,8 +77,9 @@ class SendPush(FirebaseBase):
                 try:
                     messaging.send(message)
                 except Exception as ex:
-                    if str(ex) == "Requested entity was not found.":
-                        self.database.collection(self.users).document(token.id).delete()
+                    print(str(ex))
+                    # if str(ex) == "Requested entity was not found.":
+                    #     self.database.collection(self.users).document(token.id).delete()
 
     async def main(self):
         user_tokens = self.database.collection(self.users).get()
