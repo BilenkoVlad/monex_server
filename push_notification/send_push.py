@@ -20,6 +20,9 @@ class SendPush(FirebaseBase):
         user_info = {}
         follow_list = token.to_dict()
         follow_list.pop("platform")
+        follow_list.pop("brightness_dark")
+        follow_list.pop("device_name")
+        follow_list.pop("fav_currencies")
 
         source = list(follow_list.keys())[0]
         targets = follow_list[source]
