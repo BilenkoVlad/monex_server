@@ -43,14 +43,14 @@ class SendPush(FirebaseBase):
             if user_info[source][target]["previous"] < user_info[source][target]["current"]:
                 message = messaging.Message(
                     notification=messaging.Notification(
-                        title="Some constant title for changing rate",
-                        body=f"{target} currency to {source} is increased to {user_info[source][target]['current']}"
+                        title="Rate up ↗️",
+                        body=f"{target} to {source} is up! 🚀 New rate: {user_info[source][target]['current']}"
                     ),
-                    token=token.id
+                    token=token.id,
                 )
 
                 self.database.collection(self.users).document(token.id).collection(self.notifications).add(
-                    {"text": f"{target} currency to {source} is decreased to {user_info[source][target]['current']}",
+                    {"text": f"{target} to {source} is up! 🚀 New rate: {user_info[source][target]['current']}",
                      "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
                      "up": True,
                      "target": target,
@@ -61,14 +61,14 @@ class SendPush(FirebaseBase):
             if user_info[source][target]["previous"] > user_info[source][target]["current"]:
                 message = messaging.Message(
                     notification=messaging.Notification(
-                        title="Some constant title for changing rate",
-                        body=f"{target} currency to {source} is decreased to {user_info[source][target]['current']}"
+                        title="Rate down ↘️",
+                        body=f"{target} to {source} dropped! 📉 New rate: {user_info[source][target]['current']}"
                     ),
                     token=token.id,
                 )
 
                 self.database.collection(self.users).document(token.id).collection(self.notifications).add(
-                    {"text": f"{target} currency to {source} is decreased to {user_info[source][target]['current']}",
+                    {"text": f"{target} to {source} dropped! 📉 New rate: {user_info[source][target]['current']}",
                      "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
                      "up": False,
                      "target": target,
