@@ -4,6 +4,7 @@ import datetime
 from firebase_admin import messaging
 from google.cloud.firestore_v1 import DocumentSnapshot
 
+from currency.currency import Currency
 from push_notification.firebase_base import FirebaseBase
 
 
@@ -19,12 +20,8 @@ class SendPush(FirebaseBase):
     async def process_token(self, token: DocumentSnapshot):
         user_info = {}
         follow_list = token.to_dict()
-        follow_list.pop("platform")
-        follow_list.pop("brightness_dark")
-        follow_list.pop("device_name")
-        follow_list.pop("fav_currencies")
 
-        source = list(follow_list.keys())[0]
+        source = [cur for cur in Currency.currency_dict if cur in follow_list][0]
         targets = follow_list[source]
         user_info[source] = {}
 
