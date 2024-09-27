@@ -41,13 +41,13 @@ class SendPush(FirebaseBase):
                 message = messaging.Message(
                     notification=messaging.Notification(
                         title="Rate up ↗️",
-                        body=f"{target} to {source} is up! 🚀 New rate: {user_info[source][target]['current']}"
+                        body=f"{source} to {target} is up! 🚀 New rate: {user_info[source][target]['current']}"
                     ),
                     token=token.id,
                 )
 
                 self.database.collection(self.users).document(token.id).collection(self.notifications).add(
-                    {"text": f"{target} to {source} is up! 🚀 New rate: {user_info[source][target]['current']}",
+                    {"text": f"{source} to {target} is up! 🚀 New rate: {user_info[source][target]['current']}",
                      "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
                      "up": True,
                      "target": target,
@@ -59,13 +59,13 @@ class SendPush(FirebaseBase):
                 message = messaging.Message(
                     notification=messaging.Notification(
                         title="Rate down ↘️",
-                        body=f"{target} to {source} dropped! 📉 New rate: {user_info[source][target]['current']}"
+                        body=f"{source} to {target} dropped! 📉 New rate: {user_info[source][target]['current']}"
                     ),
                     token=token.id,
                 )
 
                 self.database.collection(self.users).document(token.id).collection(self.notifications).add(
-                    {"text": f"{target} to {source} dropped! 📉 New rate: {user_info[source][target]['current']}",
+                    {"text": f"{source} to {target} dropped! 📉 New rate: {user_info[source][target]['current']}",
                      "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
                      "up": False,
                      "target": target,
