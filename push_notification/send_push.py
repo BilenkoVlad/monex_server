@@ -17,7 +17,7 @@ class SendPush(FirebaseBase):
                         if val["target"] == target:
                             user_info[source_cur][target][rate_data] = val["rate"]
 
-    async def process_token(self, token: DocumentSnapshot):
+    async def process_token(self, token: DocumentSnapshot, test_push: bool = False):
         user_info = {}
         follow_list = token.to_dict()
 
@@ -37,51 +37,80 @@ class SendPush(FirebaseBase):
 
         for target in targets:
             message = None
-            if user_info[source][target]["previous"] < user_info[source][target]["current"]:
+            if not test_push:
+                if user_info[source][target]["previous"] < user_info[source][target]["current"]:
+                    message = messaging.Message(
+                        notification=messaging.Notification(
+                            title="Rate up ↗️",
+                            body=f"{source} to {target} is up! 🚀 New rate: {user_info[source][target]['current']}"
+                        ),
+                        token=token.id,
+                    )
+
+                    self.database.collection(self.users).document(token.id).collection(self.notifications).add(
+                        {"text": f"{source} to {target} is up! 🚀 New rate: {user_info[source][target]['current']}",
+                         "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
+                         "up": True,
+                         "target": target,
+                         "source": source,
+                         "value": user_info[source][target]['current'],
+                         "read": False
+                         })
+
+                if user_info[source][target]["previous"] > user_info[source][target]["current"]:
+                    message = messaging.Message(
+                        notification=messaging.Notification(
+                            title="Rate down ↘️",
+                            body=f"{source} to {target} dropped! 📉 New rate: {user_info[source][target]['current']}"
+                        ),
+                        token=token.id,
+                    )
+
+                    self.database.collection(self.users).document(token.id).collection(self.notifications).add(
+                        {"text": f"{source} to {target} dropped! 📉 New rate: {user_info[source][target]['current']}",
+                         "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
+                         "up": False,
+                         "target": target,
+                         "source": source,
+                         "value": user_info[source][target]['current'],
+                         "read": False
+                         })
+
+                if message is not None:
+                    try:
+                        messaging.send(message)
+                    except Exception as ex:
+                        print(str(ex))
+            else:
                 message = messaging.Message(
                     notification=messaging.Notification(
                         title="Rate up ↗️",
-                        body=f"{source} to {target} is up! 🚀 New rate: {user_info[source][target]['current']}"
+                        body="USD to UAH is up! 🚀 New rate: 1.0"
                     ),
                     token=token.id,
                 )
 
                 self.database.collection(self.users).document(token.id).collection(self.notifications).add(
-                    {"text": f"{source} to {target} is up! 🚀 New rate: {user_info[source][target]['current']}",
+                    {"text": "USD to UAH is up! 🚀 New rate: 1.0",
                      "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
                      "up": True,
-                     "target": target,
-                     "source": source,
-                     "value": user_info[source][target]['current']
+                     "target": "UAH",
+                     "source": "USD",
+                     "value": 1.0,
+                     "read": False
                      })
 
-            if user_info[source][target]["previous"] > user_info[source][target]["current"]:
-                message = messaging.Message(
-                    notification=messaging.Notification(
-                        title="Rate down ↘️",
-                        body=f"{source} to {target} dropped! 📉 New rate: {user_info[source][target]['current']}"
-                    ),
-                    token=token.id,
-                )
-
-                self.database.collection(self.users).document(token.id).collection(self.notifications).add(
-                    {"text": f"{source} to {target} dropped! 📉 New rate: {user_info[source][target]['current']}",
-                     "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
-                     "up": False,
-                     "target": target,
-                     "source": source,
-                     "value": user_info[source][target]['current']
-                     })
-
-            if message is not None:
                 try:
                     messaging.send(message)
                 except Exception as ex:
-                    print(str(ex))
-                    # if str(ex) == "Requested entity was not found.":
-                    #     self.database.collection(self.users).document(token.id).delete()
+                    pass
 
     async def main(self):
         user_tokens = self.database.collection(self.users).get()
         tasks = [self.process_token(token) for token in user_tokens]
+        await asyncio.gather(*tasks)
+
+    async def test_notifications_main(self):
+        user_tokens = self.database.collection(self.users).get()
+        tasks = [self.process_token(token, True) for token in user_tokens]
         await asyncio.gather(*tasks)
