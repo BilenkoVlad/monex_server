@@ -39,14 +39,6 @@ class SendPush(FirebaseBase):
             message = None
             if not test_push:
                 if user_info[source][target]["previous"] < user_info[source][target]["current"]:
-                    message = messaging.Message(
-                        notification=messaging.Notification(
-                            title="Rate up ↗️",
-                            body=f"{source} to {target} is up! 🚀 New rate: {user_info[source][target]['current']}"
-                        ),
-                        token=token.id,
-                    )
-
                     self.database.collection(self.users).document(token.id).collection(self.notifications).add(
                         {"text": f"{source} to {target} is up! 🚀 New rate: {user_info[source][target]['current']}",
                          "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
@@ -57,15 +49,27 @@ class SendPush(FirebaseBase):
                          "read": False
                          })
 
-                if user_info[source][target]["previous"] > user_info[source][target]["current"]:
+                    notification_collection: DocumentSnapshot = self.database.collection(self.users).document(
+                        token.id).collection(self.notifications).get()
+
+                    badge_count = sum(1 for collection in notification_collection if not collection.to_dict()["read"])
+
                     message = messaging.Message(
                         notification=messaging.Notification(
-                            title="Rate down ↘️",
-                            body=f"{source} to {target} dropped! 📉 New rate: {user_info[source][target]['current']}"
+                            title="Rate up ↗️",
+                            body=f"{source} to {target} is up! 🚀 New rate: {user_info[source][target]['current']}"
                         ),
                         token=token.id,
+                        apns=messaging.APNSConfig(
+                            payload=messaging.APNSPayload(
+                                aps=messaging.Aps(
+                                    badge=badge_count
+                                )
+                            )
+                        )
                     )
 
+                if user_info[source][target]["previous"] > user_info[source][target]["current"]:
                     self.database.collection(self.users).document(token.id).collection(self.notifications).add(
                         {"text": f"{source} to {target} dropped! 📉 New rate: {user_info[source][target]['current']}",
                          "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
@@ -76,20 +80,32 @@ class SendPush(FirebaseBase):
                          "read": False
                          })
 
+                    notification_collection: DocumentSnapshot = self.database.collection(self.users).document(
+                        token.id).collection(self.notifications).get()
+
+                    badge_count = sum(1 for collection in notification_collection if not collection.to_dict()["read"])
+
+                    message = messaging.Message(
+                        notification=messaging.Notification(
+                            title="Rate down ↘️",
+                            body=f"{source} to {target} dropped! 📉 New rate: {user_info[source][target]['current']}"
+                        ),
+                        token=token.id,
+                        apns=messaging.APNSConfig(
+                            payload=messaging.APNSPayload(
+                                aps=messaging.Aps(
+                                    badge=badge_count
+                                )
+                            )
+                        )
+                    )
+
                 if message is not None:
                     try:
                         messaging.send(message)
                     except Exception as ex:
                         print(str(ex))
             else:
-                message = messaging.Message(
-                    notification=messaging.Notification(
-                        title="Rate up ↗️",
-                        body="USD to UAH is up! 🚀 New rate: 1.0"
-                    ),
-                    token=token.id,
-                )
-
                 self.database.collection(self.users).document(token.id).collection(self.notifications).add(
                     {"text": "USD to UAH is up! 🚀 New rate: 1.0",
                      "date": datetime.datetime.now().strftime("%d-%m-%y %H:%M"),
@@ -100,10 +116,30 @@ class SendPush(FirebaseBase):
                      "read": False
                      })
 
+                notification_collection: DocumentSnapshot = self.database.collection(self.users).document(
+                    token.id).collection(self.notifications).get()
+
+                badge_count = sum(1 for collection in notification_collection if not collection.to_dict()["read"])
+
+                message = messaging.Message(
+                    notification=messaging.Notification(
+                        title="Rate up ↗️",
+                        body="USD to UAH is up! 🚀 New rate: 1.0",
+                    ),
+                    token=token.id,
+                    apns=messaging.APNSConfig(
+                        payload=messaging.APNSPayload(
+                            aps=messaging.Aps(
+                                badge=badge_count
+                            )
+                        )
+                    )
+                )
+
                 try:
                     messaging.send(message)
                 except Exception as ex:
-                    pass
+                    self.database.collection(self.users).document(token.id).delete()
 
     async def main(self):
         user_tokens = self.database.collection(self.users).get()
