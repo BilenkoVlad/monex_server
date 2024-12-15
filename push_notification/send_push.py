@@ -52,8 +52,6 @@ class SendPush(FirebaseBase):
                           current_data=user_info[source][target]["current"],
                           test_push=test_push)
 
-
-
     async def main(self):
         user_tokens = self.database.collection(self.users).list_documents()
         for token in user_tokens:
