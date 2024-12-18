@@ -9,9 +9,9 @@ from push_notification.push_funcs import full_flow
 
 class SendPush(FirebaseBase):
     async def update_user_info_rates(self, source_cur, targets, rate_data, user_info):
-        for current in self.database.collection(self.api_data).document(rate_data).get().to_dict().keys():
+        for current in self.api_data_collection_local[rate_data]:
             if current == source_cur:
-                for val in self.database.collection(self.api_data).document(rate_data).get().to_dict()[current]:
+                for val in self.api_data_collection_local[rate_data][current]:
                     for target in targets:
                         if val["target"] == target:
                             user_info[source_cur][target][rate_data] = val["rate"]
@@ -20,6 +20,8 @@ class SendPush(FirebaseBase):
         if "test" in token.to_dict()["platform"]:
             self.delete_user(token=token)
         else:
+            self.set_user_doc(token=token)
+
             user_info = {}
             follow_list = token.to_dict()
 
@@ -53,12 +55,11 @@ class SendPush(FirebaseBase):
                           test_push=test_push)
 
     async def main(self):
-        user_tokens = self.database.collection(self.users).list_documents()
-        for token in user_tokens:
+        self.read_collections()
+        for token, user_data in self.users_collection_local.items():
             self.delete_broken_collection(token=token)
 
-        user_tokens = self.database.collection(self.users).get()
-        tasks = [self.process_token(token) for token in user_tokens]
+        tasks = [self.process_token(token) for token, user_data in self.users_collection_local.items()]
         await asyncio.gather(*tasks)
 
     async def test_notifications_main(self):

@@ -29,28 +29,52 @@ class FirebaseBase:
         return cls._instance
 
     def __init__(self):
+        self.user_doc = None
         self.logger = setup_server_logger()
         self.database = firestore.client()
         self.server_url = os.environ.get('SERVER_URL')
+
         self.api_data = "api_data"
+        self.api_data_collection: CollectionReference = self.database.collection(self.api_data)
+
         self.users = "users"
+        self.users_collection: CollectionReference = self.database.collection(self.users)
+
         self.notifications = "notifications"
+        self.notifications_collection: CollectionReference = self.database.collection(self.notifications)
+
+        self.api_data_collection_local = {}
+        self.users_collection_local = {}
+        self.users_to_delete = []
+
+        self.logger.info("FirebaseBase is initiated")
+
+    def read_collections(self):
+        self.logger.info("Read api_data collection")
+        for api_data_collection in self.database.collection(self.api_data).get():
+            self.api_data_collection_local[api_data_collection.id] = api_data_collection.to_dict()
+
+        self.logger.info("Read users collection")
+        for user_collection in self.database.collection(self.users).list_documents():
+            self.users_collection_local[user_collection.id] = user_collection.get().to_dict()
+
+    def set_user_doc(self, token: DocumentSnapshot):
+        self.user_doc: DocumentReference = self.users_collection.document(token.id)
 
     def delete_user(self, token: DocumentSnapshot):
-        users_col: CollectionReference = self.database.collection(self.users)
-        user_doc: DocumentReference = users_col.document(token.id)
+        user_doc: DocumentReference = self.users_collection.document(token.id)
         user_doc.delete()
         self.logger.info(f"Deleting user with token '{token.id}'")
         if user_doc.get().exists:
             self.logger.warning(f"User with token '{token.id}' was not deleted")
 
     def delete_broken_collection(self, token: DocumentSnapshot):
-        users_col: CollectionReference = self.database.collection(self.users)
-        user_doc: DocumentReference = users_col.document(token.id)
+        del self.users_collection_local[token.id]
+
+        user_doc: DocumentReference = self.users_collection.document(token.id)
         if not user_doc.get().exists:
             self.logger.info("Deleting broken user")
-            user_nots: CollectionReference = user_doc.collection(self.notifications)
-            notifications: list[DocumentReference] = list(user_nots.list_documents())
+            notifications: list[DocumentReference] = list(self.notifications_collection.list_documents())
             if len(notifications):
                 for notif in notifications:
                     notif.delete()
