@@ -7,7 +7,7 @@ from push_notification.send_push import SendPush
 
 try:
     start = datetime.now()
-    asyncio.run(SendPush().main())
+    SendPush().cleanup()
     finish = datetime.now()
     print(finish - start)
 except (ResourceExhausted, RetryError) as re:

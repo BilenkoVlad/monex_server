@@ -1,14 +1,9 @@
-name: Send Push Notifications
+name: Cleanup
 
 on:
-  workflow_run:
-    workflows:
-      - Fetch API Data
-    types:
-      - completed
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'  # This runs every hour
+    - cron: "0 0 * * 0" # Every Sunday at 00:00 UTC
   push:
     branches:
       - master
@@ -31,8 +26,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Send Push Notifications
-        run: python send_push_script.py
+      - name: Cleanup
+        run: python cleanup.py
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MONEX_APP_F86C7 }}
           SERVER_URL: ${{ secrets.SERVER_URL }}
