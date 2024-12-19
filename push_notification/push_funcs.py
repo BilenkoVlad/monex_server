@@ -2,7 +2,7 @@ import uuid
 from dataclasses import asdict
 
 from firebase_admin import messaging
-from google.cloud.firestore_v1 import CollectionReference, DocumentSnapshot
+from google.cloud.firestore_v1 import CollectionReference
 
 from api.logg import setup_server_logger
 from db_dataclasses.push_notification_dc import PushNotification, GeneralPushNotification
@@ -12,20 +12,20 @@ logger = setup_server_logger()
 
 
 def full_flow(fb_base: FirebaseBase,
-              token: DocumentSnapshot,
+              token: str,
               source: str,
               target: str,
               previous_data: float,
               current_data: float,
               test_push: bool):
-    msg = check_if_changed(token=token.id,
+    msg = check_if_changed(token=token,
                            source=source,
                            target=target,
                            previous_data=previous_data,
                            current_data=current_data,
                            test_push=test_push)
     if msg is not None:
-        general_push = GeneralPushNotification(push_notification=asdict(msg), user_token=token.id)
+        general_push = GeneralPushNotification(push_notification=asdict(msg), user_token=token)
 
         add_msg_to_user(fb_base=fb_base, token=token, msg=msg)
 
@@ -76,10 +76,10 @@ def check_if_changed(token: str,
         return None
 
 
-def add_msg_to_user(fb_base: FirebaseBase, token: DocumentSnapshot, msg: PushNotification):
+def add_msg_to_user(fb_base: FirebaseBase, token: str, msg: PushNotification):
     user_nots: CollectionReference = fb_base.user_doc.collection(fb_base.notifications)
     user_nots.add(asdict(msg))
-    logger.info(f"Notification '{asdict(msg)}' was added to user with token '{token.id}'")
+    logger.info(f"Notification '{asdict(msg)}' was added to user with token '{token}'")
 
 
 def add_msg_to_general_db(fb_base: FirebaseBase, general_push: GeneralPushNotification):
@@ -92,11 +92,11 @@ def add_msg_to_general_db(fb_base: FirebaseBase, general_push: GeneralPushNotifi
 
 
 def send_notification(fb_base: FirebaseBase,
-                      token: DocumentSnapshot,
+                      token: str,
                       msg: PushNotification,
                       general_push_id: str):
     try:
-        logger.info(f"Sending push notification for '{token.id}'")
+        logger.info(f"Sending push notification for '{token}'")
 
         user_nots: CollectionReference = fb_base.user_doc.collection(fb_base.notifications)
 
@@ -107,7 +107,7 @@ def send_notification(fb_base: FirebaseBase,
                 title=msg.notification_title,
                 body=msg.notification_body
             ),
-            token=token.id,
+            token=token,
             apns=messaging.APNSConfig(
                 payload=messaging.APNSPayload(
                     aps=messaging.Aps(
@@ -123,6 +123,6 @@ def send_notification(fb_base: FirebaseBase,
         fb_base.notifications_collection.document(general_push_id).delete()
     except Exception as ex:
         logger.error(ex)
-        logger.error(f"Push notification for '{token.id}' was not sent")
+        logger.error(f"Push notification for '{token}' was not sent")
         if str(ex) == "Requested entity was not found.":
             fb_base.delete_user(token=token)
