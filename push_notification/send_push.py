@@ -51,7 +51,8 @@ class SendPush(FirebaseBase):
     async def main(self):
         self.read_collections()
 
-        tasks = [self.process_token(token, user_data) for token, user_data in self.users_collection_local.items()]
+        tasks = [self.process_token(token, user_data) for token, user_data in self.users_collection_local.items() if
+                 user_data is not None]
         await asyncio.gather(*tasks)
 
     def cleanup(self):
