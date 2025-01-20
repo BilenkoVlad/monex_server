@@ -81,7 +81,7 @@ def send_notification(fb_base: FirebaseBase,
 
         logger.info(f"Sending push notification for '{token}'")
 
-        badge_count = sum(1 for collection in fb_base.users_local[token][fb_base.notifications] if not collection.to_dict()["read"])
+        badge_count = sum(1 for collection in fb_base.users_local[token][fb_base.notifications] if not collection["read"])
         message = messaging.Message(
             notification=messaging.Notification(
                 title=msg.notification_title,
