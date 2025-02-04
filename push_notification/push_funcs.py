@@ -1,5 +1,3 @@
-import json
-import os
 from dataclasses import asdict
 
 from firebase_admin import messaging
@@ -81,7 +79,6 @@ def send_notification(fb_base: FirebaseBase,
 
         logger.info(f"Sending push notification for '{token}'")
 
-        badge_count = sum(1 for collection in fb_base.users_local[token][fb_base.notifications] if not collection["read"])
         message = messaging.Message(
             notification=messaging.Notification(
                 title=msg.notification_title,
@@ -91,7 +88,7 @@ def send_notification(fb_base: FirebaseBase,
             apns=messaging.APNSConfig(
                 payload=messaging.APNSPayload(
                     aps=messaging.Aps(
-                        badge=badge_count
+                        badge=1
                     )
                 )
             )

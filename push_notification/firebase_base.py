@@ -75,10 +75,6 @@ class FirebaseBase:
         for user_collection in u_c:
             try:
                 users_collection_local[user_collection.id] = user_collection.get().to_dict()
-                if user_collection is not None:
-                    users_collection_local[user_collection.id][self.notifications] = [notif.to_dict() for notif in
-                                                                                      user_collection.collection(
-                                                                                          self.notifications).get()]
             except TypeError:
                 self.delete_broken_collection(token=user_collection.id)
 
