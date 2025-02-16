@@ -93,7 +93,7 @@ def send_notification(fb_base: FirebaseBase,
                 )
             )
         )
-        logger.info(f"Push notification data: '{asdict(msg)}'. Badge count is '{badge_count}'")
+        logger.info(f"Push notification data: '{asdict(msg)}'. Badge count is '1'")
 
         messaging.send(message)
     except Exception as ex:
