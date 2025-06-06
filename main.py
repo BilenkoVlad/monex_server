@@ -52,13 +52,13 @@ def current_rates():
             try:
                 if rate["curr"] == Currency.USD and buy == Currency.USD:
                     return [{
-                        "rate": round(1 / rate["sell"]["value"], 3),
+                        "rate": round(rate["sell"]["value"], 3),
                         "source": "CZK",
                         "target": rate["curr"],
                     }]
                 if rate["curr"] == Currency.EUR and buy == Currency.EUR:
                     return [{
-                        "rate": round(1 / rate["sell"]["value"], 3),
+                        "rate": round(rate["sell"]["value"], 3),
                         "source": "CZK",
                         "target": rate["curr"],
                     }]
