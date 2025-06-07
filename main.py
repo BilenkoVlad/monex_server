@@ -52,13 +52,13 @@ def current_rates():
             try:
                 if rate["curr"] == Currency.USD and buy == Currency.USD:
                     return [{
-                        "rate": round(rate["sell"]["value"], 3),
+                        "rate": rate["sell"]["value"],
                         "source": "CZK",
                         "target": rate["curr"],
                     }]
                 if rate["curr"] == Currency.EUR and buy == Currency.EUR:
                     return [{
-                        "rate": round(rate["sell"]["value"], 3),
+                        "rate": rate["sell"]["value"],
                         "source": "CZK",
                         "target": rate["curr"],
                     }]
@@ -202,7 +202,7 @@ def own_czk_rates(give_currency):
             if give_currency == Currency.CZK:
                 if rate["curr"] == Currency.USD or rate["curr"] == Currency.EUR:
                     result.append({
-                        "rate": round(1 / rate["sell"]["value"], 3),
+                        "rate": rate["sell"]["value"],
                         "source": "CZK",
                         "target": rate["curr"],
                     })
