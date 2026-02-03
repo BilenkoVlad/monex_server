@@ -35,7 +35,7 @@ jobs:
           script: |
             set -euo pipefail
 
-            cd restaurant_be
+            cd monex_server
 
             git fetch --all --prune
             git checkout -f ${{ inputs.ref }} || git checkout -b ${{ inputs.ref }}
@@ -47,7 +47,7 @@ jobs:
         with:
           script: |
             set -euo pipefail
-            cd restaurant_be
+            cd monex_server
 
             docker compose down --remove-orphans || true
 
