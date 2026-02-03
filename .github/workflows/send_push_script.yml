@@ -7,9 +7,6 @@ on:
     types:
       - completed
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 jobs:
   fetch-data:

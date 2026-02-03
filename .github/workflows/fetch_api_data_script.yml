@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 * * * *'  # This runs every hour
-  push:
-    branches:
-      - master
 
 jobs:
   fetch-data:
