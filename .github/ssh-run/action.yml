@@ -1,0 +1,18 @@
+name: ssh-run
+description: Run a shell script over SSH with common defaults
+inputs:
+  script:
+    description: Bash script to run remotely
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: SSH run
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ env.SSH_HOST }}
+        username: ${{ env.SSH_USER }}
+        key: ${{ env.SSH_KEY }}
+        port: ${{ env.SSH_PORT }}
+        script_stop: true
+        script: ${{ inputs.script }}

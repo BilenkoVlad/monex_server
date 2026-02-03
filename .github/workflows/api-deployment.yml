@@ -1,0 +1,73 @@
+name: Run Backend service deployment
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        required: true
+    secrets:
+      SSH_HOST:
+        required: true
+      SSH_PORT:
+        required: true
+      SSH_USER:
+        required: true
+      SSH_KEY:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Pull latest code over SSH
+        timeout-minutes: 10
+        uses: ./.github/actions/ssh-run
+        with:
+          script: |
+            set -euo pipefail
+
+            cd restaurant_be
+
+            git fetch --all --prune
+            git checkout -f ${{ inputs.ref }} || git checkout -b ${{ inputs.ref }}
+            git reset --hard origin/${{ inputs.ref }}
+
+      - name: Stop running Docker Compose services
+        timeout-minutes: 60
+        uses: ./.github/actions/ssh-run
+        with:
+          script: |
+            set -euo pipefail
+            cd restaurant_be
+
+            docker compose down --remove-orphans || true
+
+      - name: Start Docker Compose services
+        timeout-minutes: 180
+        uses: ./.github/actions/ssh-run
+        with:
+          script: |
+            set -euo pipefail
+
+            cd monex_server
+
+            docker compose pull || true
+            docker compose up -d --build
+
+      - name: Cleanup old Docker images
+        timeout-minutes: 10
+        uses: ./.github/actions/ssh-run
+        with:
+          script: |
+            set -euo pipefail
+
+            docker image prune -f || true
