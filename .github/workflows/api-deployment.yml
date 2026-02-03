@@ -1,11 +1,10 @@
 name: Run Backend service deployment
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
   workflow_call:
-    inputs:
-      ref:
-        type: string
-        required: true
     secrets:
       SSH_HOST:
         required: true
@@ -38,8 +37,8 @@ jobs:
             cd monex_server
 
             git fetch --all --prune
-            git checkout -f ${{ inputs.ref }} || git checkout -b ${{ inputs.ref }}
-            git reset --hard origin/${{ inputs.ref }}
+            git checkout -f master || git checkout -b master
+            git reset --hard origin/master
 
       - name: Stop running Docker Compose services
         timeout-minutes: 60
