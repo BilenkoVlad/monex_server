@@ -40,30 +40,7 @@ jobs:
             git checkout -f master || git checkout -b master
             git reset --hard origin/master
 
-      - name: Stop running Docker Compose services
-        uses: ./.github/actions/ssh-run
-        with:
-          script: |
-            set -euo pipefail
-            cd monex_server
-
-            docker compose down --remove-orphans || true
-
       - name: Start Docker Compose services
         uses: ./.github/actions/ssh-run
         with:
-          script: |
-            set -euo pipefail
-
-            cd monex_server
-
-            docker compose pull || true
-            docker compose up -d --build
-
-      - name: Cleanup old Docker images
-        uses: ./.github/actions/ssh-run
-        with:
-          script: |
-            set -euo pipefail
-
-            docker image prune -f || true
+          script: docker run -d --name monex-server -p 8000:8000 --restart unless-stopped vbilenko99/monex-server:1.0
