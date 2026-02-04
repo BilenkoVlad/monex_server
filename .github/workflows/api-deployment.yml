@@ -41,6 +41,4 @@ jobs:
       - name: Start Docker Compose services
         uses: ./.github/actions/ssh-run
         with:
-          script: |
-            docker build -t vbilenko99/monex-server:1.0 .
-            docker run -d --name monex-server -p 8000:8000 --restart unless-stopped vbilenko99/monex-server:1.0
+          script: docker run -d --name monex-server -p 8000:8000 --restart unless-stopped vbilenko99/monex-server:1.0
